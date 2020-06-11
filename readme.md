@@ -14,6 +14,8 @@ This week's lab focussed on building an LKE cluster, configuring kubectl, and de
 4. Deploy the [`nigelpoulton/lke-nodebalancer:1.0`](https://hub.docker.com/repository/docker/nigelpoulton/lke-nodebalancer) application using a Deployment YAML file
 5. **Remember to delete your cluster when you're finished.** Failure to do this will incur costs.
 
+**Tip!** the `app.yml` file is in the Docker Hub repo listed above.
+
 Happy learning, and feel free to ping me publicly on [Twitter](https://twitter.com/nigelpoulton) and [LinkedIn](https://www.linkedin.com/in/nigelpoulton/) with how you get on, and feel free to copy @Linode.
 
 @nigelpoulton
