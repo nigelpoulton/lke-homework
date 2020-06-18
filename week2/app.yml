@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-lke
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: hello-lke
+  template:
+    metadata:
+      labels:
+        app: hello-lke
+    spec:
+      containers:
+      - name: hello-lke
+        image: nigelpoulton/lke-nodebalancer:1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
