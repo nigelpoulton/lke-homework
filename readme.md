@@ -62,3 +62,66 @@ LoadBalancer Services integrate with the Linode Cloud to create a highly-availab
 5. Use `kubectl delete svc lke-loadbalancer` to delete the K8s Service **and** Linode NodeBalancer. Failure to do this will incur costs to your Linode account
 
 **Remember to delete your LKE cluster. Failure to do this will incur costs to your Linode account.**
+
+## Week 3 homework tasks
+
+This week's lab assumes you already have an LKE cluster with `kubectl` configured. 
+
+The homework is split into four sections: 
+
+1. Deploy a Pod and lose data
+2. Create a persistent volume
+3. Connect the volume to a Pod and write data to it
+4. Delete the Pod and prove the data still exists
+
+### Deploy a Pod and lose some data
+
+The following steps will create a new Pod and write some data to it, delete the Pod, recreate it, and prove that the data is no longer present. This demonstrates that data written to a Pod is lost when the Pod is lost/deleted.
+
+1. Use `kubectl apply -f` to deploy a new Pod form the `week3/pod.yml` file
+2. Uae `kubectl exec -it testpod bash` to connect your terminal to the Pod
+3. Write some data to the Pod: `mkdir test && echo "LKE FTW" > /test/newfile`
+4. Verify the data was successfully written (`cat /test/newfile`)
+5. Disconnect from the Pod (`exit`) and delete the Pod (`kubectl delete pod testpod`)
+6. Recreate the Pod from the same `week3.pod.yml` file
+7. Prove the data is not in this new Pod (`kubectl exec testpod cat /test/newfile`)
+
+Delete the Pod form this example.
+
+### Create a persistent volume
+
+These steps will create a new block storage volume on the Linode storage back-end. The process will create a new Persistent Volume Claim (PVC) on your LKE cluster. The PVC references the `linode-block-storage-retain` StorageClass (SC) that already exists on the cluster and automatically creates a new block storage volume on the Linode back-end as well as an associated Persisten Volume object on the LKE cluster. 
+
+1. Run `kubectl get sc` to list existing StorageClass objects on the cluster
+2. Use `kubectl apply -f` to create anew PVC from the `week3/pvc.yml` file
+3. Check that new PVC and PV objects have been created (`kubectl get pv` and `kubectl get pvc`)
+4. Check the Linode Cloud Console in a web browser and verify a new block storage volume has been created
+
+At this point a new block storage volume has been created on the Linode cloud and an associated PV object has been created on the LKE cluster. A PVC object has also been created. In the next section you'll deploy a new Pod that mounts a volume via the PVC just created.
+
+### Connect the volume to a Pod and write data to it
+
+In this step you'll deploy a new Pod that mounts a volume via the newly created PVC. The YAML file tells the Pod (container) to mount the volume directly to `/data`. You'll write some data to a new file in `/data`.
+
+1. Create a new Pod form the `week3/volpod.yml` file
+2. Exec onto the Pod with `kubectl exec -it volpod bash`
+3. Write some data to a new file called `persistent` in `/data` (`echo "Linode rocks" > /data/persistent`)
+4. Disconnect from the Pod (`exit`)
+5. Verify the data was written (`kubectl exec volpod cat /data/persistent`)
+
+At this point you there are no Pod running, but the PV, PVC and block storage volume on the Linode back-end still exist.
+
+### Delete the Pod and prove the data still exists
+
+In these steps you'll delete `volpod`, verify the volume related objects still exist, start a new Pod and connect the volume to it, and verify the data is in tact.
+
+1. Delete `volpod` Pod with `kubectl delete pod volpod`
+2. Verify the PV and PVC still exist (`kubectl get pv` and `kubectl get pvc`)
+3. Use the Linode Cloud Dashboard to verify the block storage volume still exists on the Linode back-end
+4. Deploy a new Pod from the `week3/rescuepod.yml` file (inspect the YAML file to see that it mounts the volume that you write data to in the previous section)
+5. Connect to the Pod with `kubectl exec -it rescuepod bash`
+6. Verify the file and data created in the previous step are now present in the `/linode` directory (`cat /linode/persistent`)
+
+These three sections showed how the lifecycle of data and volumes can be decoupled from the lifecycle of Pods, allowing data to persist and be accessible after the Pod that created it has been deleted.
+
+Feel free to reach out to @nigelpoulton and @linode on Twitter, as well as see my books and video courses (nigelpoulton.com) for more detailed explanations. Enjoy!

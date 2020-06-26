@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rescuepod
+spec:
+  volumes:
+    - name: rescue-vol
+      persistentVolumeClaim:
+        claimName: linode-block
+  containers:
+  - image: ubuntu:latest
+    name: ctr1
+    command:
+    - /bin/bash
+    - "-c"
+    - "sleep 60m"
+    volumeMounts: 
+    - mountPath: /linode
+      name: rescue-vol
